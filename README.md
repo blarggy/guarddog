@@ -1,11 +1,10 @@
-Subsonic Guarddog
+Guarddog
 
 The intent of this program is to watch log files for strange activity and send notifcations and handle
 
 Required libraries:
 
-psutil
-schedule
+psutil, schedule
 
 Setup instructions:
 
