@@ -63,6 +63,7 @@ def guard_dog():
                     terminated = True
                 except Exception as e:
                     print(f"Failed to kill process: {proc.name()} {e}")
+                    terminated = False
 
         subject = f'Guarddog alert in watched file'
         body = f'Checked activity in watched file: {watched_file}\n\n{matched_lines}\n\n' \
