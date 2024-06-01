@@ -1,6 +1,6 @@
 Guarddog
 
-The intent of this program is to watch log files for strange activity and send notifcations and handle
+The intent of this program is to watch log files for strange activity and send notifcations and kill the guarded process if something unwanted appears in a log.
 
 Required libraries:
 
