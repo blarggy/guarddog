@@ -1,10 +1,12 @@
 import configparser
+import datetime
 import smtplib
 import os
+import sys
+from _datetime import datetime
 import time
 from email.message import EmailMessage
 import psutil
-import schedule
 
 
 config_file = 'config.cfg'
@@ -38,7 +40,7 @@ def send_email(subject, body):
         server.login(from_email, from_password)
         server.send_message(msg)
 
-    print(f'Email sent to {to_email}')
+    print(f'[{datetime.now()}] Email sent to {to_email}')
 
 
 def guard_dog():
@@ -46,6 +48,7 @@ def guard_dog():
     config = load_config()
     watched_file = config.get('System','watched_file')
     guarded_app = config.get('System', 'guarded_app')
+    print(f"[{datetime.now()}] [{guarded_app}] guarding {watched_file}")
     with open(watched_file, 'r') as file:
         log_contents = file.readlines()
     matched_lines = []
@@ -55,14 +58,15 @@ def guard_dog():
                 matched_lines.append(line.strip())
                 break
     if matched_lines:
+        terminated = False
         for proc in psutil.process_iter():
             if proc.name() == guarded_app:
                 try:
                     proc.terminate()
-                    print(f"Process terminated: {proc.name()}")
+                    print(f"[{datetime.now()}] Process terminated: {proc.name()}")
                     terminated = True
                 except Exception as e:
-                    print(f"Failed to kill process: {proc.name()} {e}")
+                    print(f"[{datetime.now()}] Failed to kill process: {proc.name()} {e}")
                     terminated = False
 
         subject = f'Guarddog alert in watched file'
@@ -71,7 +75,7 @@ def guard_dog():
 
         try:
             send_email(subject, body)
-            exit(1)
+            sys.exit(0)
         except Exception as e:
             print(f"Failed to send email {e}")
 
@@ -79,12 +83,12 @@ def guard_dog():
 def run_app():
     config = load_config()
     interval = int(config.get('App', 'check_interval_minutes'))
-    schedule.every(interval).minutes.do(guard_dog)
-    print(f"Guarddog started for {config.get('System', 'guarded_app')}\n"
-          f"Checking {config.get('System','watched_file')} every {interval} minutes")
+    print(f"[{datetime.now()}] Guarddog started for {config.get('System', 'guarded_app')}\n"
+          f"[{datetime.now()}] Checking {config.get('System','watched_file')} every {interval} minutes")
+
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        guard_dog()
+        time.sleep(interval * 60)
 
 
 run_app()
